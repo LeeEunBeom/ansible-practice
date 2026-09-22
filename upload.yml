@@ -7,7 +7,7 @@
 
   vars:
     project_dir: /home/ansible/ansible
-    github_repo: "git@github.com:YOUR_ID/ansible-practice.git"
+    github_repo: "git@github.com:LeeEunBeom/ansible-practice.git"
     git_user_name: "YOUR_ID"
     git_user_email: "YOUR_EMAIL"
     commit_message: "Update Ansible practice files"
