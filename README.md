@@ -23,3 +23,5 @@ ansible-playbook -i localhost, upload.yml
 ```
 
 변경 사항이 있을 때만 새 커밋을 생성합니다.
+
+Ansible 플레이북을 이용한 GitHub 업로드 자동화 실습 완료.
