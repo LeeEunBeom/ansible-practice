@@ -1,0 +1,106 @@
+---
+- name: Upload Ansible practice files to GitHub
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    project_dir: /home/ansible/ansible
+    github_repo: "git@github.com:YOUR_ID/ansible-practice.git"
+    git_user_name: "YOUR_ID"
+    git_user_email: "YOUR_EMAIL"
+    commit_message: "Update Ansible practice files"
+
+    # Ansible 실행에 사용한 Python을 로컬 작업에도 사용
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+  module_defaults:
+    ansible.builtin.command:
+      chdir: "{{ project_dir }}"
+
+  tasks:
+    - name: Initialize Git repository on main branch
+      ansible.builtin.command:
+        argv: [git, init, -b, main]
+        creates: "{{ project_dir }}/.git"
+
+    - name: Configure Git author name
+      ansible.builtin.command:
+        argv: [git, config, user.name, "{{ git_user_name }}"]
+      changed_when: false
+
+    - name: Configure Git author email
+      ansible.builtin.command:
+        argv: [git, config, user.email, "{{ git_user_email }}"]
+      changed_when: false
+
+    - name: Read configured remotes
+      ansible.builtin.command:
+        argv: [git, remote]
+      register: git_remotes
+      changed_when: false
+
+    - name: Add GitHub remote
+      ansible.builtin.command:
+        argv: [git, remote, add, origin, "{{ github_repo }}"]
+      when: "'origin' not in git_remotes.stdout_lines"
+
+    - name: Read origin URL
+      ansible.builtin.command:
+        argv: [git, remote, get-url, origin]
+      register: origin_url
+      changed_when: false
+
+    - name: Verify upload destination
+      ansible.builtin.assert:
+        that:
+          - origin_url.stdout == github_repo
+        fail_msg: "origin 주소가 github_repo와 다릅니다. 저장소 주소를 확인하세요."
+
+    - name: Read current branch
+      ansible.builtin.command:
+        argv: [git, symbolic-ref, --short, HEAD]
+      register: current_branch
+      changed_when: false
+
+    - name: Verify main branch
+      ansible.builtin.assert:
+        that:
+          - current_branch.stdout == 'main'
+        fail_msg: "현재 브랜치가 main이 아닙니다. 브랜치를 확인하세요."
+
+    - name: Detect changed files
+      ansible.builtin.command:
+        argv: [git, status, --porcelain]
+      register: git_status
+      changed_when: false
+
+    - name: Stage changed files
+      ansible.builtin.command:
+        argv: [git, add, --all]
+      when: git_status.stdout | length > 0
+
+    - name: Check staged changes
+      ansible.builtin.command:
+        argv: [git, diff, --cached, --quiet]
+      register: staged_changes
+      changed_when: false
+      failed_when: staged_changes.rc not in [0, 1]
+
+    - name: Commit only when staged changes exist
+      ansible.builtin.command:
+        argv: [git, commit, -m, "{{ commit_message }}"]
+      when: staged_changes.rc == 1
+
+    - name: Push to GitHub
+      ansible.builtin.command:
+        argv: [git, push, --porcelain, -u, origin, main]
+      environment:
+        GIT_SSH_COMMAND: "ssh -o BatchMode=yes"
+      register: push_result
+      changed_when: "'[up to date]' not in push_result.stdout"
+
+    - name: Show push result
+      ansible.builtin.debug:
+        var: push_result.stdout_lines

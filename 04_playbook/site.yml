@@ -1,0 +1,44 @@
+---
+#######################################
+# 1) 패키지 설치 - httpd
+# 2) 웹서버 설정
+#   - /etc/httpd/conf/httpd.conf, /etc/httpd/conf.d/*.conf
+#   - /var/www/html/*
+# 3) 웹서버 기동 - httpd.service
+# 4) 방화벽 등록 - http(80/tcp)
+# 5) SELinux(?)
+########################################
+- name: 0) 웹서버 설정
+  hosts: webservers
+#- hosts: web1.example.com:web2.example.com
+  tasks:
+    # 1) 패키지 설치 - httpd
+    - name: 1) 패키지 설치
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+
+    # 2) 웹서버 설정
+    #   - /etc/httpd/conf/httpd.conf, /etc/httpd/conf.d/*.conf
+    #   - /var/www/html/*
+    - name: 2) 웹서버 설정
+      ansible.builtin.copy:
+        content: 'My WEB Server\n'
+        dest: /var/www/html/index.html
+    
+    # 3) 웹서버 기동 - httpd.service
+    - name: 3) 웹서버 기동
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
+
+    # 4) 방화벽 등록 - http(80/tcp)
+    - name: 4) 방화벽 등록
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        permanent: true
+        immediate: true
+
+    

@@ -1,0 +1,20 @@
+# SSH 키와 인증 정보
+.ssh/
+id_rsa
+id_ed25519
+*.pem
+*.key
+.env
+.env.*
+
+# Vault 비밀번호 파일
+.vault_pass*
+.vault-password*
+vault_pass*
+vault-password*
+
+# 임시 파일
+*.retry
+*.swp
+__pycache__/
+*.pyc

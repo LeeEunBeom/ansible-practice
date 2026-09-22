@@ -1,0 +1,17 @@
+- name: Play01 - Mariadb 설정
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: 1) DB 서비스 종료
+      ansible.builtin.service:
+        name: mariadb
+        state: stopped
+        enabled: false
+
+    - name: 2) 패키지 설치 - mariadb, mariadb-server, python3-PyMySQL
+      ansible.builtin.dnf:
+        name:
+          - mariadb
+          - mariadb-server
+          - python3-PyMySQL
+        state: absent

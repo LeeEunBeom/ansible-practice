@@ -1,0 +1,26 @@
+---
+- name: Play01 - 웹서버 설정
+  hosts : webserver
+  tasks:
+    - name: 1) 방화벽 포트 제거 - http
+      ansible.posix.firewalld:
+        service: "{{ ansible_local['custom']['general']['fwsvc'] }}"
+        state: disabled
+        permanent: true
+        immediate: true
+
+    - name: 2) 서비스 종료 - "{{ ansible_local['custom']['general']['service'] }}"
+      ansible.builtin.systemd_service:
+        name: "{{ ansible_local['custom']['general']['service'] }}"
+        state: stopped
+        enabled: false        
+
+    - name: 3) 패키지 삭제 - httpd - "{{ ansible_local['custom']['general']['package'] }}"
+      ansible.builtin.dnf:
+        name: "{{ ansible_local['custom']['general']['package'] }}"
+        state: absent
+      
+
+
+
+
