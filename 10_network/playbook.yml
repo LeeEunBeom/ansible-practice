@@ -1,0 +1,8 @@
+---
+- name: 네트워크 정보 확인
+  hosts: servers
+  tasks:
+    - name: 네트워크 정보 확인
+      ansible.builtin.debug:
+        var: ansible_facts['ens224']
+      when: ansible_facts['ens224'] is defined

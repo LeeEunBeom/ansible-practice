@@ -1,0 +1,7 @@
+---
+- name: Demo Web
+  hosts: localhost
+  tasks:
+    - name: Demo Web Start
+      ansible.builtin.include_role: 
+        name: demoweb
